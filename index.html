@@ -428,7 +428,7 @@ let lastNotifiedOrderId = '';
 
 let driverMap = null, driverRoutingControl = null;
 
-// MEMUAT SESI DARI LOCALSTORAGE AGAR TIDAK HILANG SAAT REFRESH
+// MEMUAT SESI SECARA AMAN DARI LOCALSTORAGE
 window.addEventListener('DOMContentLoaded', () => {
   const savedSession = localStorage.getItem('masTolongSession');
   if (savedSession) {
@@ -456,6 +456,7 @@ function playOrderNotificationSound() {
 
 function showHomePage() {
   localStorage.removeItem('masTolongSession');
+  currentUserSession = null;
   document.getElementById('viewHome').style.display = 'block';
   document.getElementById('viewAuth').style.display = 'none';
   document.getElementById('viewCustomer').style.display = 'none';
@@ -468,6 +469,9 @@ function showAuthPage(role) {
   selectedAuthRole = role;
   document.getElementById('viewHome').style.display = 'none';
   document.getElementById('viewAuth').style.display = 'block';
+  document.getElementById('viewCustomer').style.display = 'none';
+  document.getElementById('viewDriver').style.display = 'none';
+  document.getElementById('viewAdmin').style.display = 'none';
 
   if (role === 'customer') {
     document.getElementById('authTitle').innerText = "Akses Pelanggan";
@@ -724,7 +728,13 @@ function readFileAsDataURL(file, callback) {
 }
 
 function openDashboard(role) {
+  // Pastikan SEMUA view disembunyikan dulu sebelum menampilkan role yang sesuai
+  document.getElementById('viewHome').style.display = 'none';
   document.getElementById('viewAuth').style.display = 'none';
+  document.getElementById('viewCustomer').style.display = 'none';
+  document.getElementById('viewDriver').style.display = 'none';
+  document.getElementById('viewAdmin').style.display = 'none';
+  
   document.getElementById('headerLogout').style.display = 'block';
 
   if (role === 'customer') {
@@ -752,6 +762,7 @@ function openDashboard(role) {
 
 function processLogout() {
   currentUserSession = null;
+  localStorage.removeItem('masTolongSession');
   alert("Log Out Berhasil.");
   showHomePage();
 }
