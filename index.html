@@ -59,7 +59,7 @@ main { max-width: 480px; margin: auto; padding: 12px; position: relative; z-inde
 .menu-item.active { background: #e0f2fe; border-color: var(--blue-primary); color: var(--blue-primary); }
 .menu-icon { font-size: 20px; display: block; margin-bottom: 2px; }
 
-.btn { width: 100%; padding: 12px; border: none; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block; text-align: center; margin-bottom: 6px; position: relative; z-index: 30; }
+.btn { width: 100%; padding: 12px; border: none; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block; text-align: center; margin-bottom: 6px; position: relative; z-index: 50; pointer-events: auto !important; }
 .btn-primary { background: var(--blue-primary); color: white; }
 .btn-green { background: var(--green); color: white; }
 .btn-red { background: var(--red); color: white; }
@@ -334,8 +334,8 @@ main { max-width: 480px; margin: auto; padding: 12px; position: relative; z-inde
       <p style="font-size:11px; color:#64748b; margin-bottom:8px;">Akses rahasia khusus pemilik perusahaan.</p>
       
       <div style="display:grid; grid-template-columns: 1fr; gap:6px; margin-top:8px;">
-        <button class="btn btn-green" style="font-size:11px; padding:10px; margin:0;" onclick="setupDemoAccountAsCustomer()">👤 Setel Akun Khusus sebagai Pelanggan</button>
-        <button class="btn btn-primary" style="font-size:11px; padding:10px; margin:0;" onclick="setupDemoAccountAsDriver()">🛵 Setel Akun Khusus sebagai Driver</button>
+        <button class="btn btn-green" style="font-size:11px; padding:12px; margin:0;" onclick="setupDemoAccountAsCustomer()">👤 Setel Akun Khusus sebagai Pelanggan</button>
+        <button class="btn btn-primary" style="font-size:11px; padding:12px; margin:0;" onclick="setupDemoAccountAsDriver()">🛵 Setel Akun Khusus sebagai Driver</button>
       </div>
 
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-top:8px;">
@@ -428,7 +428,6 @@ let lastNotifiedOrderId = '';
 
 let driverMap = null, driverRoutingControl = null;
 
-// MEMUAT SESI SECARA AMAN DARI LOCALSTORAGE
 window.addEventListener('DOMContentLoaded', () => {
   const savedSession = localStorage.getItem('masTolongSession');
   if (savedSession) {
@@ -595,7 +594,7 @@ function setupDemoAccountAsCustomer() {
     createdAt: new Date().toLocaleString("id-ID")
   };
   db.ref('customers/' + demoCustId).set(demoData, () => {
-    alert("Akun khusus berhasil disetel sebagai PELANGGAN RESMI!");
+    alert("✅ Akun khusus berhasil disetel sebagai PELANGGAN RESMI!\nID/Email: AhmadadipMST0000\nSandi: 081933Ae");
   });
 }
 
@@ -621,7 +620,7 @@ function setupDemoAccountAsDriver() {
     createdAt: new Date().toLocaleString("id-ID")
   };
   db.ref('drivers/' + demoDriverId).set(demoData, () => {
-    alert("Akun khusus berhasil disetel sebagai MITRA DRIVER RESMI!");
+    alert("✅ Akun khusus berhasil disetel sebagai MITRA DRIVER RESMI!\nID/Email: AhmadadipMST0000\nSandi: 081933Ae");
   });
 }
 
@@ -728,7 +727,6 @@ function readFileAsDataURL(file, callback) {
 }
 
 function openDashboard(role) {
-  // Pastikan SEMUA view disembunyikan dulu sebelum menampilkan role yang sesuai
   document.getElementById('viewHome').style.display = 'none';
   document.getElementById('viewAuth').style.display = 'none';
   document.getElementById('viewCustomer').style.display = 'none';
