@@ -231,12 +231,12 @@ main { max-width: 480px; margin: auto; padding: 12px; position: relative; z-inde
       <div id="map"></div>
       
       <div class="input-container">
-        <input type="text" id="pickupInput" class="input-box" placeholder="Lokasi Jemput (Wajib area Kertosono/Jombang)..." value="Alun-Alun Jombang" oninput="handleSearch(this.value, 'pickup')">
+        <input type="text" id="pickupInput" class="input-box" placeholder="Lokasi Jemput (Ketik & tekan Enter/pilih saran)..." value="Alun-Alun Jombang" oninput="handleSearch(this.value, 'pickup')">
         <div id="pickupResults" class="search-results"></div>
       </div>
 
       <div class="input-container">
-        <input type="text" id="destInput" class="input-box" placeholder="Lokasi Tujuan (Wajib area Kertosono/Jombang)..." value="Stasiun Jombang" oninput="handleSearch(this.value, 'dest')">
+        <input type="text" id="destInput" class="input-box" placeholder="Lokasi Tujuan (Ketik & tekan Enter/pilih saran)..." value="Stasiun Jombang" oninput="handleSearch(this.value, 'dest')">
         <div id="destResults" class="search-results"></div>
       </div>
 
@@ -440,6 +440,39 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   } else {
     showHomePage();
+  }
+
+  // Tutup dropdown hasil pencarian jika pengguna mengklik di luar area input/hasil
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('#pickupInput') && !e.target.closest('#pickupResults')) {
+      const pRes = document.getElementById('pickupResults');
+      if (pRes) pRes.style.display = 'none';
+    }
+    if (!e.target.closest('#destInput') && !e.target.closest('#destResults')) {
+      const dRes = document.getElementById('destResults');
+      if (dRes) dRes.style.display = 'none';
+    }
+  });
+
+  // Listener tombol Enter pada input lokasi agar otomatis memilih hasil teratas
+  const pickupIn = document.getElementById('pickupInput');
+  if (pickupIn) {
+    pickupIn.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        autoSelectTopResult(this.value, 'pickup');
+      }
+    });
+  }
+
+  const destIn = document.getElementById('destInput');
+  if (destIn) {
+    destIn.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        autoSelectTopResult(this.value, 'dest');
+      }
+    });
   }
 });
 
@@ -1163,7 +1196,7 @@ function handleSearch(query, type) {
   fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Jombang, Indonesia')}&limit=6`)
     .then(res => res.json())
     .then(data => {
-      if (!data.length) return;
+      if (!data.length) { resultBox.style.display = 'none'; return; }
       resultBox.style.display = 'block';
       resultBox.innerHTML = data.map(item => `
         <div class="search-item" onclick="selectLocation(${item.lat}, ${item.lon}, '${item.display_name.replace(/'/g, "\\'")}', '${type}')">
@@ -1173,21 +1206,40 @@ function handleSearch(query, type) {
     });
 }
 
+function autoSelectTopResult(query, type) {
+  if (query.length < 3) return;
+  fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Jombang, Indonesia')}&limit=1`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.length > 0) {
+        let item = data[0];
+        selectLocation(item.lat, item.lon, item.display_name, type);
+      } else {
+        alert("Lokasi tidak ditemukan di sekitar Jombang/Kertosono.");
+      }
+    });
+}
+
 function selectLocation(lat, lng, address, type) {
   document.getElementById(type === 'pickup' ? 'pickupInput' : 'destInput').value = address;
   document.getElementById(type === 'pickup' ? 'pickupResults' : 'destResults').style.display = 'none';
 
   if (type === 'pickup') { 
     startLat = parseFloat(lat); startLng = parseFloat(lng); 
-    if(markerStart) markerStart.setLatLng([startLat, startLng]);
+    if(markerStart) {
+      markerStart.setLatLng([startLat, startLng]);
+      if (map) map.setView([startLat, startLng], 14);
+    }
   } else { 
     endLat = parseFloat(lat); endLng = parseFloat(lng); 
-    if(markerEnd) markerEnd.setLatLng([endLat, endLng]);
+    if(markerEnd) {
+      markerEnd.setLatLng([endLat, endLng]);
+      if (map) map.setView([endLat, endLng], 14);
+    }
   }
 
   if (routingControl) {
     routingControl.setWaypoints([L.latLng(startLat, startLng), L.latLng(endLat, endLng)]);
-    map.setView([lat, lng], 13);
   }
 }
 
