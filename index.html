@@ -428,6 +428,22 @@ let lastNotifiedOrderId = '';
 
 let driverMap = null, driverRoutingControl = null;
 
+// MEMUAT SESI DARI LOCALSTORAGE AGAR TIDAK HILANG SAAT REFRESH
+window.addEventListener('DOMContentLoaded', () => {
+  const savedSession = localStorage.getItem('masTolongSession');
+  if (savedSession) {
+    try {
+      currentUserSession = JSON.parse(savedSession);
+      openDashboard(currentUserSession.role);
+    } catch(e) {
+      localStorage.removeItem('masTolongSession');
+      showHomePage();
+    }
+  } else {
+    showHomePage();
+  }
+});
+
 function playOrderNotificationSound() {
   if ('speechSynthesis' in window) {
     let utterance = new SpeechSynthesisUtterance("Mas Tolong, Mas! Ada orderan baru masuk!");
@@ -439,6 +455,7 @@ function playOrderNotificationSound() {
 }
 
 function showHomePage() {
+  localStorage.removeItem('masTolongSession');
   document.getElementById('viewHome').style.display = 'block';
   document.getElementById('viewAuth').style.display = 'none';
   document.getElementById('viewCustomer').style.display = 'none';
@@ -493,6 +510,7 @@ function processLoginSubmit() {
   if (selectedAuthRole === 'admin') {
     if (email === 'Ahmadadip121294' && pass === '081933Ae') {
       currentUserSession = { name: "Ahmad Adip (Admin Pusat Rahasia)", role: "admin" };
+      localStorage.setItem('masTolongSession', JSON.stringify(currentUserSession));
       openDashboard('admin');
     } else {
       alert("⚠️ ID atau Kata Sandi Admin Salah!");
@@ -500,6 +518,7 @@ function processLoginSubmit() {
   } else if (selectedAuthRole === 'customer') {
     if (email === 'AhmadadipMST0000' && pass === '081933Ae') {
       currentUserSession = { id: 'CUST-DEMO001', name: 'Ahmad Adip (Pelanggan Khusus)', email: 'AhmadadipMST0000', role: 'customer', photo: 'https://via.placeholder.com/60', noUrut: '#000', points: 100, vouchers: 1, saldoDompet: 250000, accountStatus: 'ACTIVE' };
+      localStorage.setItem('masTolongSession', JSON.stringify(currentUserSession));
       openDashboard('customer');
       return;
     }
@@ -515,6 +534,7 @@ function processLoginSubmit() {
         }
         if (pass === '081933Ae' || pass === cust.password) {
           currentUserSession = { id: custKey, name: cust.name, email: cust.email, role: "customer", photo: cust.facePhoto, noUrut: cust.noUrut, points: cust.points, vouchers: cust.vouchers, saldoDompet: cust.saldoDompet, accountStatus: cust.accountStatus || 'ACTIVE' };
+          localStorage.setItem('masTolongSession', JSON.stringify(currentUserSession));
           openDashboard('customer');
         } else {
           alert("Kata sandi salah!");
@@ -526,6 +546,7 @@ function processLoginSubmit() {
   } else if (selectedAuthRole === 'driver') {
     if (email === 'AhmadadipMST0000' && pass === '081933Ae') {
       currentUserSession = { id: 'AhmadadipMST0000', name: 'Ahmad Adip (Driver Khusus)', email: 'AhmadadipMST0000', role: 'driver', mitraId: 'AhmadadipMST0000', danaPhone: '085141145797', photo: 'https://via.placeholder.com/60', dompetku: 500000, bonusHariIni: 15000, completedCount: 12, rating: 5.0, totalReviews: 25, status: 'APPROVED' };
+      localStorage.setItem('masTolongSession', JSON.stringify(currentUserSession));
       openDashboard('driver');
       return;
     }
@@ -541,6 +562,7 @@ function processLoginSubmit() {
         }
         if (pass === '081933Ae' || pass === drv.password) {
           currentUserSession = { id: drvKey, name: drv.name, email: drv.email, role: "driver", mitraId: drv.mitraId, danaPhone: drv.danaPhone, photo: drv.facePhoto, dompetku: drv.dompetku, bonusHariIni: drv.bonusHariIni, completedCount: drv.completedCount, rating: drv.rating || 5.0, totalReviews: drv.totalReviews || 0, status: drv.status || 'APPROVED' };
+          localStorage.setItem('masTolongSession', JSON.stringify(currentUserSession));
           openDashboard('driver');
         } else {
           alert("Kata sandi salah!");
